@@ -5,4 +5,7 @@
     <string name="title_notifications">Notifications</string>
     <string name="add">Add</string>
     <string name="explore">Explore</string>
+    <string name="recipe_title">Recipe Title</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="preparation_steps">Preparation Steps</string>
 </resources>
