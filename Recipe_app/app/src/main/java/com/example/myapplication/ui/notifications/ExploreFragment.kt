@@ -7,36 +7,36 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.myapplication.databinding.FragmentNotificationsBinding
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.ExploreAdapter
+import com.example.myapplication.ExploreRecipe
+import com.example.myapplication.R
 
 class ExploreFragment : Fragment() {
 
-    private var _binding: FragmentNotificationsBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: ExploreAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val notificationsViewModel =
-            ViewModelProvider(this).get(NotificationsViewModel::class.java)
-
-        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        val textView: TextView = binding.textNotifications
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
-        return root
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
+        return inflater.inflate(R.layout.fragment_explore, container, false)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        recyclerView = view.findViewById(R.id.exploreRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val sampleRecipes = listOf(
+            ExploreRecipe("Paneer Butter Masala", "Creamy North Indian curry made with paneer, tomatoes, and spices."),
+            ExploreRecipe("Spaghetti Aglio e Olio", "Quick Italian pasta with garlic and olive oil."),
+            ExploreRecipe("Dosa", "South Indian rice-lentil crepe served with chutney and sambar."),
+            ExploreRecipe("Veggie Fried Rice", "Stir-fried rice with fresh vegetables and soy sauce.")
+        )
+
+        adapter = ExploreAdapter(sampleRecipes)
+        recyclerView.adapter = adapter
     }
 }

@@ -1,7 +1,7 @@
 package com.example.myapplication.ui.dashboard
 
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.view.LayoutInflater 
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -47,7 +47,6 @@ class AddFragment : Fragment() {
             }
         }
     }
-
     private fun saveRecipe(recipe: Recipe) {
         lifecycleScope.launch {
             recipeDao.insertRecipe(recipe)

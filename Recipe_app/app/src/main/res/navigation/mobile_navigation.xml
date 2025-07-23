@@ -21,5 +21,5 @@
         android:id="@+id/navigation_Explore"
         android:name="com.example.myapplication.ui.notifications.ExploreFragment"
         android:label="Explore"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_explore" />
 </navigation>
