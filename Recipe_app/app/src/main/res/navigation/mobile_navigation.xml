@@ -9,7 +9,11 @@
         android:id="@+id/navigation_home"
         android:name="com.example.myapplication.ui.home.HomeFragment"
         android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_navigationHome_to_recipeDetailFragment"
+            app:destination="@id/recipeDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_Add"
@@ -22,4 +26,27 @@
         android:name="com.example.myapplication.ui.notifications.ExploreFragment"
         android:label="Explore"
         tools:layout="@layout/fragment_explore" />
+    <fragment
+        android:id="@+id/recipeDetailFragment"
+        android:name="com.example.myapplication.RecipeDetailFragment"
+        android:label="Recipe Detail">
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="ingredients"
+            app:argType="string" />
+        <argument
+            android:name="steps"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_explore"
+        android:name="com.example.myapplication.ui.notifications.ExploreFragment">
+        <action
+            android:id="@+id/action_navigation_explore_to_recipeDetailFragment"
+            app:destination="@id/recipeDetailFragment" />
+    </fragment>
+
+
 </navigation>
