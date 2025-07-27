@@ -14,16 +14,14 @@
             android:id="@+id/action_navigationHome_to_recipeDetailFragment"
             app:destination="@id/recipeDetailFragment" />
     </fragment>
-
     <fragment
         android:id="@+id/navigation_Add"
         android:name="com.example.myapplication.ui.dashboard.AddFragment"
         android:label="Add"
         tools:layout="@layout/fragment_add" />
-
     <fragment
         android:id="@+id/navigation_Explore"
-        android:name="com.example.myapplication.ui.notifications.ExploreFragment"
+        android:name="com.example.myapplication.ui.Explore.ExploreFragment"
         android:label="Explore"
         tools:layout="@layout/fragment_explore" />
     <fragment
@@ -42,11 +40,9 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_explore"
-        android:name="com.example.myapplication.ui.notifications.ExploreFragment">
+        android:name="com.example.myapplication.ui.Explore.ExploreFragment">
         <action
             android:id="@+id/action_navigation_explore_to_recipeDetailFragment"
             app:destination="@id/recipeDetailFragment" />
     </fragment>
-
-
 </navigation>
