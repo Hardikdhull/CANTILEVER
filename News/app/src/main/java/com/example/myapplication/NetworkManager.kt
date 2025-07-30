@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -9,9 +10,10 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class NetworkManager private constructor(private val context: Context) {
+class NetworkManager private constructor(context: Context) {
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var INSTANCE: NetworkManager? = null
 
@@ -50,7 +52,6 @@ class NetworkManager private constructor(private val context: Context) {
 
     init {
         registerNetworkCallback()
-        // Set initial status
         _networkStatus.value = if (isNetworkAvailable()) NetworkStatus.CONNECTED else NetworkStatus.DISCONNECTED
     }
 
@@ -106,7 +107,6 @@ class NetworkManager private constructor(private val context: Context) {
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)
         } catch (e: Exception) {
-            // Network callback might not be registered
         }
     }
 }
