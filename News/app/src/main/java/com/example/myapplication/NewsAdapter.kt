@@ -1,4 +1,4 @@
-package com.example.newsaggregator
+package com.example.myapplication
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
-import com.example.myapplication.R
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 

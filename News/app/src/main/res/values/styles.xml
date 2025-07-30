@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary_color</item>
@@ -10,14 +10,14 @@
         <item name="colorSurface">@color/surface_color</item>
         <item name="android:statusBarColor">@color/primary_dark_color</item>
         <item name="android:navigationBarColor">@color/surface_color</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
     <style name="ToolbarTitle" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:fontFamily">@font/Roboto_Bold</item>
+        <item name="android:fontFamily">@font/roboto_bold</item>
     </style>
 
     <style name="NewsCardStyle" parent="Widget.Material3.CardView.Elevated">
@@ -35,7 +35,7 @@
         <item name="chipMinHeight">40dp</item>
         <item name="chipStartPadding">12dp</item>
         <item name="chipEndPadding">12dp</item>
-        <item name="android:fontFamily">@font/Roboto_Medium</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
     </style>
 
     <style name="CategoryChipStyle.Selected" parent="CategoryChipStyle">
@@ -47,26 +47,26 @@
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">@font/Roboto_Bold</item>
+        <item name="android:fontFamily">@font/roboto_bold</item>
         <item name="android:lineSpacingExtra">2dp</item>
     </style>
 
     <style name="NewsDescription" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">@font/Roboto_Regular</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
         <item name="android:lineSpacingExtra">4dp</item>
     </style>
     <style name="NewsSource" parent="TextAppearance.Material3.LabelMedium">
         <item name="android:textColor">@color/accent_color</item>
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">@font/Roboto_Medium</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
     </style>
     <style name="NewsDate" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textColor">@color/text_tertiary</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:fontFamily">@font/Roboto_Regular</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
     </style>
     <style name="ProgressIndicatorStyle" parent="Widget.Material3.LinearProgressIndicator">
         <item name="indicatorColor">@color/accent_color</item>

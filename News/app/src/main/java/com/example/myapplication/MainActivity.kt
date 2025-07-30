@@ -1,4 +1,4 @@
-package com.example.newsaggregator
+package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -13,10 +14,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.myapplication.R
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,10 +25,13 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLEncoder
+import java.net.UnknownHostException
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.net.ssl.SSLException
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,13 +40,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var chipGroup: ChipGroup
     private lateinit var progressIndicator: LinearProgressIndicator
-
+    private lateinit var networkManager: NetworkManager
     private val newsList = mutableListOf<NewsItem>()
     private val allNewsList = mutableListOf<NewsItem>()
     private val NEWS_API_KEY = "4ab0fc61577d4d97a4f3a642b43d408f"
-    //private val NY_TIMES_API_KEY = "YOUR_NY_TIMES_API_KEY"
     private val NEWS_API_BASE = "https://newsapi.org/v2/top-headlines"
-    //private val NY_TIMES_BASE = "https://api.nytimes.com/svc/topstories/v2"
     private val categories = listOf("all", "business", "entertainment", "health", "science", "sports", "technology")
     private var currentCategory = "all"
     private var currentSearchQuery = ""
@@ -50,29 +52,66 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         setSupportActionBar(findViewById(R.id.toolbar))
+        networkManager = NetworkManager.getInstance(this)
         setupViews()
         setupRecyclerView()
         setupCategoryChips()
-        loadNews()
+        setupNetworkObserver()
+        if (networkManager.isNetworkAvailable()) {
+            loadNews()
+        } else {
+            showNetworkError()
+        }
     }
     private fun setupViews() {
         recyclerView = findViewById(R.id.recyclerView)
         swipeRefresh = findViewById(R.id.swipeRefresh)
         chipGroup = findViewById(R.id.chipGroup)
         progressIndicator = findViewById(R.id.progressIndicator)
-
         swipeRefresh.setOnRefreshListener {
-            loadNews()
+            if (networkManager.isNetworkAvailable()) {
+                loadNews()
+            } else {
+                swipeRefresh.isRefreshing = false
+                showNetworkError()
+            }
         }
-
         swipeRefresh.setColorSchemeResources(
             R.color.primary_color,
             R.color.accent_color,
             R.color.secondary_color
         )
     }
+    private fun setupNetworkObserver() {
+        networkManager.networkStatus.observe(this) { status ->
+            when (status) {
+                NetworkStatus.CONNECTED -> {
+                    if (allNewsList.isEmpty()) {
+                        loadNews()
+                    }
+                    showConnectionStatus("Connected", false)
+                }
+                NetworkStatus.DISCONNECTED -> {
+                    showConnectionStatus("No internet connection", true)
+                }
+            }
+        }
+    }
+    private fun showConnectionStatus(message: String, isError: Boolean) {
+        val rootView = findViewById<View>(android.R.id.content)
+        val snackbar = Snackbar.make(rootView, message,
+            if (isError) Snackbar.LENGTH_INDEFINITE else Snackbar.LENGTH_SHORT)
+        if (isError) {
+            snackbar.setAction("Retry") {
+                if (networkManager.isNetworkAvailable()) {
+                    loadNews()
+                }
+            }
+        }
+        snackbar.show()
+    }
+
     private fun setupRecyclerView() {
         newsAdapter = NewsAdapter(newsList) { newsItem ->
             openNewsInBrowser(newsItem.url)
@@ -115,8 +154,12 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
-                    currentSearchQuery = it
-                    searchNews(it)
+                    if (networkManager.isNetworkAvailable()) {
+                        currentSearchQuery = it
+                        searchNews(it)
+                    } else {
+                        showNetworkError()
+                    }
                 }
                 return true
             }
@@ -130,11 +173,14 @@ class MainActivity : AppCompatActivity() {
         })
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_refresh -> {
-                loadNews()
+                if (networkManager.isNetworkAvailable()) {
+                    loadNews()
+                } else {
+                    showNetworkError()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -146,6 +192,11 @@ class MainActivity : AppCompatActivity() {
             swipeRefresh.isRefreshing = false
             return
         }
+        if (!networkManager.isNetworkAvailable()) {
+            showNetworkError()
+            return
+        }
+
         showLoading(true)
         lifecycleScope.launch {
             try {
@@ -153,15 +204,14 @@ class MainActivity : AppCompatActivity() {
                 val newsApiData = withContext(Dispatchers.IO) {
                     fetchFromNewsAPI()
                 }
-//                val nyTimesData = withContext(Dispatchers.IO) {
-//                    fetchFromNYTimes()
-//                }
                 parseNewsAPIData(newsApiData)
-                //parseNYTimesData(nyTimesData)
                 allNewsList.sortByDescending { it.publishedAt }
                 filterNews()
+                if (allNewsList.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "No news articles found", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error loading news: ${e.message}", Toast.LENGTH_SHORT).show()
+                handleNetworkError(e)
             } finally {
                 showLoading(false)
             }
@@ -173,6 +223,11 @@ class MainActivity : AppCompatActivity() {
             filterNews()
             return
         }
+        if (!networkManager.isNetworkAvailable()) {
+            showNetworkError()
+            return
+        }
+
         showLoading(true)
         lifecycleScope.launch {
             try {
@@ -180,15 +235,14 @@ class MainActivity : AppCompatActivity() {
                 val newsApiData = withContext(Dispatchers.IO) {
                     searchNewsAPI(query)
                 }
-//                val nyTimesData = withContext(Dispatchers.IO) {
-//                    searchNYTimes(query)
-//                }
                 parseNewsAPIData(newsApiData)
-                //parseNYTimesData(nyTimesData)
                 allNewsList.sortByDescending { it.publishedAt }
                 filterNews()
+                if (allNewsList.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "No results found for '$query'", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error searching news: ${e.message}", Toast.LENGTH_SHORT).show()
+                handleNetworkError(e)
             } finally {
                 showLoading(false)
             }
@@ -208,17 +262,7 @@ class MainActivity : AppCompatActivity() {
         val url = "https://newsapi.org/v2/everything?q=$encodedQuery&sortBy=publishedAt&pageSize=30&apiKey=$NEWS_API_KEY"
         return makeHttpRequest(url)
     }
-//    private fun fetchFromNYTimes(): String {
-//        val section = if (currentCategory == "all") "home" else currentCategory
-//        val url = "$NY_TIMES_BASE/$section.json?api-key=$NY_TIMES_API_KEY"
-//        return makeHttpRequest(url)
-//    }
-//
-//    private fun searchNYTimes(query: String): String {
-//        val encodedQuery = URLEncoder.encode(query, "UTF-8")
-//        val url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=$encodedQuery&sort=newest&api-key=$NY_TIMES_API_KEY"
-//        return makeHttpRequest(url)
-//    }
+
     private fun makeHttpRequest(urlString: String): String {
         val connection = URL(urlString).openConnection() as HttpURLConnection
         return try {
@@ -226,6 +270,10 @@ class MainActivity : AppCompatActivity() {
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
             connection.setRequestProperty("User-Agent", "NewsAggregator/1.0")
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw Exception("HTTP Error: $responseCode")
+            }
             val inputStream = connection.inputStream
             val reader = BufferedReader(InputStreamReader(inputStream))
             val response = StringBuilder()
@@ -235,94 +283,45 @@ class MainActivity : AppCompatActivity() {
             }
             reader.close()
             response.toString()
+        } catch (e: Exception) {
+            throw e
         } finally {
             connection.disconnect()
         }
     }
+
     private fun parseNewsAPIData(jsonResponse: String) {
         try {
             val jsonObject = JSONObject(jsonResponse)
+            if (jsonObject.has("status") && jsonObject.getString("status") == "error") {
+                val errorMessage = jsonObject.optString("message", "Unknown API error")
+                throw Exception("API Error: $errorMessage")
+            }
+
             val articles = jsonObject.getJSONArray("articles")
             for (i in 0 until articles.length()) {
                 val article = articles.getJSONObject(i)
-                val newsItem = NewsItem(
-                    title = article.optString("title", "No Title"),
-                    description = article.optString("description", "No Description"),
-                    imageUrl = article.optString("urlToImage", ""),
-                    publishedAt = formatDate(article.optString("publishedAt", "")),
-                    source = article.optJSONObject("source")?.optString("name", "NewsAPI") ?: "NewsAPI",
-                    url = article.optString("url", ""),
-                    category = determineCategory(article.optString("title", "") + " " + article.optString("description", "")),
-                    apiSource = "NewsAPI"
-                )
-                if (newsItem.title != "No Title" && newsItem.title.isNotEmpty()) {
+                val title = article.optString("title", "")
+                val description = article.optString("description", "")
+                if (title.isNotEmpty() && title != "null" && !title.contains("[Removed]")) {
+                    val newsItem = NewsItem(
+                        title = title,
+                        description = if (description.isEmpty() || description == "null") "No Description" else description,
+                        imageUrl = article.optString("urlToImage", ""),
+                        publishedAt = formatDate(article.optString("publishedAt", "")),
+                        source = article.optJSONObject("source")?.optString("name", "NewsAPI") ?: "NewsAPI",
+                        url = article.optString("url", ""),
+                        category = determineCategory(title + " " + description),
+                        apiSource = "NewsAPI"
+                    )
                     allNewsList.add(newsItem)
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            throw Exception("Failed to parse news data: ${e.message}")
         }
     }
-//    private fun parseNYTimesData(jsonResponse: String) {
-//        try {
-//            val jsonObject = JSONObject(jsonResponse)
-//            val articles = when {
-//                jsonObject.has("results") -> jsonObject.getJSONArray("results")
-//                jsonObject.has("response") -> jsonObject.getJSONObject("response").getJSONArray("docs")
-//                else -> return
-//            }
-//
-//            for (i in 0 until articles.length()) {
-//                val article = articles.getJSONObject(i)
-//
-//                val newsItem = if (jsonObject.has("response")) {
-//                    NewsItem(
-//                        title = article.optString("headline", "").let {
-//                            if (it.isEmpty()) article.optJSONObject("headline")?.optString("main", "No Title") ?: "No Title"
-//                            else it
-//                        },
-//                        description = article.optString("abstract", "No Description"),
-//                        imageUrl = getImageFromNYTimes(article),
-//                        publishedAt = formatNYTimesDate(article.optString("pub_date", "")),
-//                        source = "The New York Times",
-//                        url = article.optString("web_url", ""),
-//                        category = determineCategory(article.optString("section_name", "")),
-//                        apiSource = "NY Times"
-//                    )
-//                } else {
-//                    NewsItem(
-//                        title = article.optString("title", "No Title"),
-//                        description = article.optString("abstract", "No Description"),
-//                        imageUrl = getImageFromNYTimes(article),
-//                        publishedAt = formatNYTimesDate(article.optString("published_date", "")),
-//                        source = "The New York Times",
-//                        url = article.optString("url", ""),
-//                        category = article.optString("section", "general"),
-//                        apiSource = "NY Times"
-//                    )
-//                }
-//                if (newsItem.title != "No Title" && newsItem.title.isNotEmpty()) {
-//                    allNewsList.add(newsItem)
-//                }
-//            }
-//
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//    }
-//
-//    private fun getImageFromNYTimes(article: JSONObject): String {
-//        return try {
-//            val multimedia = article.optJSONArray("multimedia")
-//            if (multimedia != null && multimedia.length() > 0) {
-//                val image = multimedia.getJSONObject(0)
-//                val url = image.optString("url", "")
-//                if (url.startsWith("http")) url else "https://www.nytimes.com/$url"
-//            } else ""
-//        } catch (e: Exception) {
-//            ""
-//        }
-//    }
+
     private fun determineCategory(text: String): String {
         val lowerText = text.lowercase()
         return when {
@@ -346,9 +345,9 @@ class MainActivity : AppCompatActivity() {
         }
         newsList.addAll(filteredList)
         newsAdapter.notifyDataSetChanged()
-
-        // Scroll to top
-        recyclerView.scrollToPosition(0)
+        if (newsList.isNotEmpty()) {
+            recyclerView.scrollToPosition(0)
+        }
     }
 
     private fun formatDate(dateString: String): String {
@@ -362,24 +361,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    private fun formatNYTimesDate(dateString: String): String {
-//        return try {
-//            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-//            val outputFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-//            val date = inputFormat.parse(dateString)
-//            outputFormat.format(date ?: Date())
-//        } catch (e: Exception) {
-//            try {
-//                val altFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-//                val date = altFormat.parse(dateString)
-//                val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-//                outputFormat.format(date ?: Date())
-//            } catch (e2: Exception) {
-//                dateString
-//            }
-//        }
-//    }
-
     private fun showLoading(show: Boolean) {
         if (show) {
             progressIndicator.show()
@@ -389,11 +370,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showNetworkError() {
+        val connectionType = networkManager.getConnectionType()
+        val message = when (connectionType) {
+            ConnectionType.NONE -> "No internet connection. Please check your network settings."
+            else -> "Connection issue. Please try again."
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        swipeRefresh.isRefreshing = false
+        showLoading(false)
+    }
+
+    private fun handleNetworkError(exception: Exception) {
+        val errorMessage = when (exception) {
+            is UnknownHostException -> "Cannot connect to server. Please check your internet connection."
+            is SocketTimeoutException -> "Connection timeout. Please try again."
+            is SSLException -> "Secure connection failed. Please check your network settings."
+            else -> "Error loading news: ${exception.message}"
+        }
+
+        runOnUiThread {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
     private fun openNewsInBrowser(url: String) {
         if (url.isNotEmpty()) {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Cannot open link", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        networkManager.unregisterNetworkCallback()
     }
 }
 data class NewsItem(

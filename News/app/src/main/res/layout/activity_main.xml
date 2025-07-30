@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
-    <!-- App Bar Layout -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -14,7 +13,6 @@
         android:elevation="8dp"
         app:elevation="8dp">
 
-        <!-- Toolbar -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -26,7 +24,6 @@
             app:navigationIconTint="@android:color/white"
             app:layout_scrollFlags="scroll|enterAlways" />
 
-        <!-- Progress Indicator -->
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progressIndicator"
             android:layout_width="match_parent"
@@ -36,7 +33,6 @@
             app:indicatorColor="@color/accent_color"
             app:trackColor="@color/progress_track_color" />
 
-        <!-- Category Filter Chips -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,10 +48,7 @@
                 app:chipSpacingHorizontal="8dp" />
 
         </HorizontalScrollView>
-
     </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- Main Content -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
@@ -70,10 +63,7 @@
             android:padding="8dp"
             android:scrollbars="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <!-- Floating Action Button for Quick Refresh -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabRefresh"
         android:layout_width="wrap_content"
