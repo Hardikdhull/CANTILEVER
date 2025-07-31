@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.recipeapp
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.ui.Recipe
+import com.example.recipeapp.ui.Recipe
 
 class RecipeAdapter(
     private var recipeList: List<Recipe>,

@@ -1,10 +1,10 @@
-package com.example.myapplication
+package com.example.recipeapp
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.myapplication.ui.Recipe
+import com.example.recipeapp.ui.Recipe
 
 @Database(entities = [Recipe::class], version = 1)
 abstract class RecipeDatabase : RoomDatabase() {

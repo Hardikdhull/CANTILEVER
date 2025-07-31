@@ -1,20 +1,20 @@
-package com.example.myapplication.ui.Explore
+package com.example.recipeapp.ui.Explore
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.R
-import com.example.myapplication.RecipeAdapter
-import com.example.myapplication.RecipeDao
-import com.example.myapplication.RecipeDatabase
-import com.example.myapplication.ui.Recipe
+import com.example.recipeapp.R
+import com.example.recipeapp.RecipeAdapter
+import com.example.recipeapp.RecipeDao
+import com.example.recipeapp.RecipeDatabase
+import com.example.recipeapp.ui.Recipe
 import kotlinx.coroutines.launch
 
 class ExploreFragment : Fragment() {

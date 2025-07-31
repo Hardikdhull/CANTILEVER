@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.example.recipeapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.example.recipeapp"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -54,14 +54,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.ui.tooling)
-    //noinspection UseTomlInstead
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.compose.ui:ui")
-    //noinspection UseTomlInstead
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    val roomversion = "2.6.1"
+    val roomversion = "2.7.0-alpha12"
     implementation ("androidx.room:room-runtime:$roomversion")
     kapt ("androidx.room:room-compiler:$roomversion")
     implementation ("androidx.room:room-ktx:$roomversion")

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.home
+package com.example.recipeapp.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,9 +10,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.R
-import com.example.myapplication.RecipeAdapter
-import com.example.myapplication.RecipeDatabase
+import com.example.recipeapp.R
+import com.example.recipeapp.RecipeAdapter
+import com.example.recipeapp.RecipeDatabase
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {

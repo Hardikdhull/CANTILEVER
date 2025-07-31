@@ -3,30 +3,47 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@id/navigation_home">
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.myapplication.ui.home.HomeFragment"
+        android:name="com.example.recipeapp.ui.home.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_navigationHome_to_recipeDetailFragment"
             app:destination="@id/recipeDetailFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/navigation_Add"
-        android:name="com.example.myapplication.ui.dashboard.AddFragment"
+        android:name="com.example.recipeapp.ui.dashboard.AddFragment"
         android:label="Add"
         tools:layout="@layout/fragment_add" />
+
     <fragment
         android:id="@+id/navigation_Explore"
-        android:name="com.example.myapplication.ui.Explore.ExploreFragment"
+        android:name="com.example.recipeapp.ui.Explore.ExploreFragment"
         android:label="Explore"
-        tools:layout="@layout/fragment_explore" />
+        tools:layout="@layout/fragment_explore">
+        <action
+            android:id="@+id/action_navigationExplore_to_recipeDetailFragment"
+            app:destination="@id/recipeDetailFragment">
+            <argument
+                android:name="title"
+                app:argType="string" />
+            <argument
+                android:name="ingredients"
+                app:argType="string" />
+            <argument
+                android:name="steps"
+                app:argType="string" />
+        </action>
+    </fragment>
+
     <fragment
         android:id="@+id/recipeDetailFragment"
-        android:name="com.example.myapplication.RecipeDetailFragment"
+        android:name="com.example.recipeapp.RecipeDetailFragment"
         android:label="Recipe Detail">
         <argument
             android:name="title"
@@ -38,11 +55,5 @@
             android:name="steps"
             app:argType="string" />
     </fragment>
-    <fragment
-        android:id="@+id/navigation_explore"
-        android:name="com.example.myapplication.ui.Explore.ExploreFragment">
-        <action
-            android:id="@+id/action_navigation_explore_to_recipeDetailFragment"
-            app:destination="@id/recipeDetailFragment" />
-    </fragment>
+
 </navigation>

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.recipeapp.ui
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
